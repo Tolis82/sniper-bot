@@ -94,7 +94,7 @@ async function getMintFromTx(sig) {
       if (!postBal || postBal.length === 0) continue;
       const mint = postBal[0].mint;
       if (!mint) continue;
-      prioritizationFeeLamports: 300000
+      return { mint };
     } catch(e) {}
   }
   return null;
@@ -123,7 +123,7 @@ async function safetyCheck(mint, name) {
       if (returnRatio < 1.20) {
         console.log('🚨 [SAFETY] HIGH TAX: ' + name + ' | Επιστροφή: ' + (returnRatio * 100).toFixed(1) + '%');
         logSafety({ time: new Date().toISOString(), name, mint, result: 'LOW_RETURN', returnRatio });
-        prioritizationFeeLamports: 300000
+        safetyStats.failedTax++;
         return { safe: false, reason: 'LOW_RETURN', returnRatio };
       }
       if (outLamports < 1000) {
@@ -208,7 +208,7 @@ async function executeBuy(mint) {
     const swapRes = await axiosPostWithRetry('https://api.jup.ag/swap/v1/swap', {
       quoteResponse: quoteRes.data,
       userPublicKey: wallet.publicKey.toString(),
-      prioritizationFeeLamports: 300000
+      prioritizationFeeLamports: 100000
     }, { timeout: 8000 });
     if (!swapRes.data) { console.error('❌ No swap TX'); return null; }
     const txBuf = Buffer.from(swapRes.data.swapTransaction, 'base64');
@@ -268,7 +268,7 @@ async function executeSell(mint, tokenAmount) {
       const swapRes = await axiosPostWithRetry('https://api.jup.ag/swap/v1/swap', {
         quoteResponse: quoteRes.data,
         userPublicKey: wallet.publicKey.toString(),
-        prioritizationFeeLamports: 700000
+        prioritizationFeeLamports: 300000
       }, { timeout: 8000 });
       if (!swapRes.data) { continue; }
       const txBuf = Buffer.from(swapRes.data.swapTransaction, 'base64');
