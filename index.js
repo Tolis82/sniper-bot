@@ -8,7 +8,7 @@ const fs = require('fs');
 const RPC = process.env.HELIUS_RPC;
 const API_KEY = RPC.split('api-key=')[1];
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const BUY_AMOUNT_SOL = 0.01;
+const BUY_AMOUNT_SOL = 0.02;
 const TG_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TG_CHAT = process.env.TELEGRAM_CHAT_ID;
 const DRY_RUN = false;
@@ -94,7 +94,7 @@ async function getMintFromTx(sig) {
       if (!postBal || postBal.length === 0) continue;
       const mint = postBal[0].mint;
       if (!mint) continue;
-      return { mint };
+      prioritizationFeeLamports: 300000
     } catch(e) {}
   }
   return null;
@@ -123,7 +123,7 @@ async function safetyCheck(mint, name) {
       if (returnRatio < 1.20) {
         console.log('🚨 [SAFETY] HIGH TAX: ' + name + ' | Επιστροφή: ' + (returnRatio * 100).toFixed(1) + '%');
         logSafety({ time: new Date().toISOString(), name, mint, result: 'LOW_RETURN', returnRatio });
-        safetyStats.failedTax++;
+        prioritizationFeeLamports: 300000
         return { safe: false, reason: 'LOW_RETURN', returnRatio };
       }
       if (outLamports < 1000) {
